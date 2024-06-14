@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Palavra</title>
+  <!-- Adicionar Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Adicionar Palavra</h1>
+    <form id="add-word-form">
+      <div class="form-group">
+        <label for="word">Palavra em Português:</label>
+        <input type="text" id="word" name="word" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="translation">Tradução:</label>
+        <input type="text" id="translation" name="translation" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Adicionar</button>
+    </form>
+    <p id="message"></p>
+    <a href="protected.html">Voltar para página protegida</a>
+  </div>
+
+  <!-- Adicionar jQuery e Bootstrap JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    document.getElementById('add-word-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const word = document.getElementById('word').value;
+      const translation = document.getElementById('translation').value;
+      const token = localStorage.getItem('token');
+
+      const response = await fetch('/add-word', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ word, translation })
+      });
+
+      const data = await response.json();
+      document.getElementById('message').textContent = data.message;
+
+      if (response.status === 200) {
+        document.getElementById('add-word-form').reset();
+      }
+    });
+  </script>
+</body>
+</html>

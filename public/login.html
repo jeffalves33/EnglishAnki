@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login de Usuário</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Login de Usuário</h1>
+  <form id="login-form">
+    <label for="username">Usuário:</label>
+    <input type="text" id="username" name="username" required>
+    <label for="password">Senha:</label>
+    <input type="password" id="password" name="password" required>
+    <button type="submit">Login</button>
+  </form>
+  <p id="login-message"></p>
+  <a href="index.html">Não tem uma conta? Registre-se</a>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+      document.getElementById('login-message').textContent = data.message;
+
+      if (response.status === 200) {
+        console.log('Token recebido:', data.token);  // Log para verificar se o token está sendo recebido
+        localStorage.setItem('token', `Bearer ${data.token}`);
+        window.location.href = 'protected.html';
+      }
+    });
+  </script>
+</body>
+</html>
