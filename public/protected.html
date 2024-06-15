@@ -16,7 +16,7 @@
         <p id="translation"></p>
         <button id="show-word" class="btn btn-primary" type="button">Mostrar Palavra</button>
         <button id="show-translation" class="btn btn-outline-secondary" type="button" disabled>Mostrar Tradução</button>
-        <a href="add-word.html">Adicionar Palavra</a>
+        <a href="add-word.html" class="btn btn-secondary">Adicionar Palavra</a>
         <button id="logout" class="btn btn-danger">Logout</button>
       </div>
     </div>
@@ -41,7 +41,7 @@
 
       if (response.status === 200) {
         const data = await response.json();
-        document.getElementById('message').textContent = data.message;
+        //document.getElementById('message').textContent = data.message;
       } else {
         console.log('Falha na autenticação, redirecionando para login');
         localStorage.removeItem('token');
