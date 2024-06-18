@@ -38,7 +38,6 @@
       </div>
       <button class="btn btn-primary w-100 py-2" type="submit">Entrar</button>
       <p class="text-body-primary">Não tem uma conta? <a href="index.html">Registre-se</a></p>
-      <p id="login-message"></p>
       <p class="mt-5 mb-3 text-body-secondary">&copy; 2024</p>
     </form>
   </main>
@@ -57,7 +56,6 @@
         });
 
         const data = await response.json();
-        document.getElementById('login-message').textContent = data.message;
 
         if (response.status === 200) { //verificar se o token está sendo recebido
           localStorage.setItem('token', `Bearer ${data.token}`);

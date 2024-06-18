@@ -10,10 +10,10 @@
 </head>
 <body>
   <div class="container">
-    <div class="col-lg-6 col-xxl-4 my-5 mx-auto">
+    <div class="col-lg-6 col-xxl-4 my-5 mx-auto text-center">
       <div class="d-grid gap-2">
-        <p id="word"></p>
-        <p id="translation"></p>
+        <p id="word" class="display-4 fw-bold"></p>
+        <p id="translation" class="fs-1 text-bolder"></p>
         <button id="show-word" class="btn btn-primary" type="button">Mostrar Palavra</button>
         <button id="show-translation" class="btn btn-outline-secondary" type="button" disabled>Mostrar Tradução</button>
         <a href="add-word.html" class="btn btn-secondary">Adicionar Palavra</a>
@@ -27,7 +27,6 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const token = localStorage.getItem('token');
-      console.log('Token armazenado:', token);
 
       if (!token) {
         window.location.href = 'login.html';
@@ -41,7 +40,6 @@
 
       if (response.status === 200) {
         const data = await response.json();
-        //document.getElementById('message').textContent = data.message;
       } else {
         console.log('Falha na autenticação, redirecionando para login');
         localStorage.removeItem('token');
@@ -62,8 +60,6 @@
         document.getElementById('translation').textContent = '';
         document.getElementById('show-translation').disabled = false;
         document.getElementById('show-translation').dataset.translation = data.translation;
-      } else {
-        document.getElementById('word').textContent = 'Erro ao buscar palavra.';
       }
     });
 

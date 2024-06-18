@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-const sqlite3 = require('sqlite3').verbose();
+const mysql = require('mysql2');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const app = express();
@@ -14,28 +14,44 @@ app.use(bodyParser.json());
 // Servir arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configurar o banco de dados SQLite para usar um arquivo
-let db = new sqlite3.Database('./database.sqlite', (err) => {
-  if (err) {
-    return console.error(err.message);
-  }
-  console.log('Conectado ao banco de dados SQLite persistente.');
+// Configurar o banco de dados MySQL
+const db = mysql.createConnection({
+  host: 'viaduct.proxy.rlwy.net',
+  user: 'root',
+  password: 'XhvrFkOLxdiXvXYuHgWKxzaSrohMuJVa',
+  port: 51790,
+  database: 'railway'
 });
 
-// Criar tabelas se elas não existirem
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL
-  )`);
+db.connect((err) => {
+  if (err) {
+    return console.error('error connecting: ' + err.stack);
+  }
+  console.log('Conectado ao banco de dados MySQL.');
 
-  db.run(`CREATE TABLE IF NOT EXISTS words (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    word TEXT NOT NULL,
-    translation TEXT NOT NULL
-  )`);
+  // Criar tabelas se elas não existirem
+  const createUsersTable = `CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+  )`;
+
+  const createWordsTable = `CREATE TABLE IF NOT EXISTS words (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    word VARCHAR(255) NOT NULL,
+    translation VARCHAR(255) NOT NULL
+  )`;
+
+  db.query(createUsersTable, (err, results) => {
+    if (err) throw err;
+    console.log('Tabela users pronta.');
+  });
+
+  db.query(createWordsTable, (err, results) => {
+    if (err) throw err;
+    console.log('Tabela words pronta.');
+  });
 });
 
 // Middleware para verificar o token JWT
@@ -65,7 +81,7 @@ app.post('/register', (req, res) => {
     }
 
     const query = `INSERT INTO users (username, password) VALUES (?, ?)`;
-    db.run(query, [username, hash], function(err) {
+    db.query(query, [username, hash], (err, results) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
@@ -79,14 +95,15 @@ app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
   const query = `SELECT * FROM users WHERE username = ?`;
-  db.get(query, [username], (err, row) => {
+  db.query(query, [username], (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    if (!row) {
+    if (results.length === 0) {
       return res.status(401).json({ message: 'Credenciais inválidas!' });
     }
 
+    const row = results[0];
     bcrypt.compare(password, row.password, (err, result) => {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -101,6 +118,7 @@ app.post('/login', (req, res) => {
     });
   });
 });
+
 // Rota protegida
 app.get('/protected', authenticateJWT, (req, res) => {
   res.status(200).json({ message: 'Você está visualizando uma página protegida!', user: req.user });
@@ -112,7 +130,7 @@ app.post('/add-word', authenticateJWT, (req, res) => {
   const username = req.user.username;
 
   const query = `INSERT INTO words (username, word, translation) VALUES (?, ?, ?)`;
-  db.run(query, [username, word, translation], function(err) {
+  db.query(query, [username, word, translation], (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
@@ -124,21 +142,16 @@ app.post('/add-word', authenticateJWT, (req, res) => {
 app.get('/get-word', authenticateJWT, (req, res) => {
   const username = req.user.username;
 
-  const query = `SELECT * FROM words WHERE username = ? ORDER BY RANDOM() LIMIT 1`;
-  db.get(query, [username], (err, row) => {
+  const query = `SELECT * FROM words WHERE username = ? ORDER BY RAND() LIMIT 1`;
+  db.query(query, [username], (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    if (!row) {
+    if (results.length === 0) {
       return res.status(404).json({ message: 'Nenhuma palavra encontrada.' });
     }
-    res.status(200).json(row);
+    res.status(200).json(results[0]);
   });
-});
-
-// Rota protegida
-app.get('/protected', authenticateJWT, (req, res) => {
-  res.status(200).json({ message: 'Você está visualizando uma página protegida!', user: req.user });
 });
 
 app.listen(port, () => {
