@@ -46,7 +46,7 @@ Este projeto está licenciado sob a licença MIT. Veja o arquivo [LICENSE](LICEN
 
 ## Contato
 
-Se você tiver alguma dúvida, entre em contato pelo email: [seu-email@example.com](mailto:luiz_cleidi@hotmail.com).
+Se você tiver alguma dúvida, entre em contato pelo email: [luiz_cleidi@hotmail.com](mailto:luiz_cleidi@hotmail.com).
 
 ---
 
